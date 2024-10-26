@@ -29,7 +29,7 @@ export class BatteryAccessory extends AccessoryDefinition {
 
   createBattery(platformAccessory: AccessoryInstance) {
     const service = this.getOrCreateService('Battery', platformAccessory);
-    this.updateCharacteristic(service, 'Name', this.getText(this.name+'-battery'));
+    this.updateCharacteristic(service, 'Name', this.getText(this.name));
     this.updateCharacteristic(service, 'StatusLowBattery', 0);
   }
 
@@ -37,9 +37,10 @@ export class BatteryAccessory extends AccessoryDefinition {
     const service = this.getOrCreateService('Battery', platformAccessory);
     this.updateCharacteristic(service, 'BatteryLevel', data.chargeLevel);
     this.updateCharacteristic(service, 'ChargingState', this.isCharging(data) ? 1 : 0);
+    this.updateCharacteristic(service, 'StatusLowBattery', data.critical ? 1 : 0);
   }
 
   isCharging(data: BatteryData) {
-    return data.status === 'CHARGE'
+    return data.status.toUpperCase() === 'CHARGING'
   }
 }

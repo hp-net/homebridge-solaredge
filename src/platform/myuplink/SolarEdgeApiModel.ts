@@ -1,43 +1,57 @@
-export interface Site {
-    siteId: string;
-    name: string;
-    peakPower: number;
-    activationStatus: string;
+export interface SiteResponse {
+    sites: {
+        site: Site[],
+    }
 }
 
-export interface Device {
-    type: string;
-    serialNumber: string;
-    manufacturer: string;
-    model: string;
-    createdAt: string;
-    connectedTo: string;
-    active: boolean;
-    nameplate: number;
-    communicationType: string;
+export interface Site {
+    id: string,
+    name: string,
+    status: string,
+}
+
+export interface InventoryResponse {
+    Inventory: Inventory
+}
+
+export interface Inventory {
+    meters: [],
+    sensors: [],
+    gateways: [],
+    inverters: [],
+    batteries: Battery[]
+}
+
+export interface Battery {
+    name: string,
+    manufacturer: string,
+    model: string,
+    SN: string,
+}
+
+export interface PowerFlowResponse {
+    siteCurrentPowerFlow: PowerFlow
 }
 
 export interface PowerFlow {
-    updatedAt: string,
     refreshRate: number,
     unit: string,
-    pv: {
-        active: boolean
-        power: number
-    },
-    load: {
-        active: boolean
-        power: number
-    },
-    storage: {
-        active: boolean
-        power: number
+    PV: {
         status: string
+        currentPower: number
+    },
+    LOAD: {
+        status: string
+        currentPower: number
+    },
+    STORAGE: {
+        status: string
+        currentPower: number
         chargeLevel: number
+        critical: boolean
     },
-    grid: {
-        active: boolean
-        power: number
+    GRID: {
         status: string
+        currentPower: number
     },
 }

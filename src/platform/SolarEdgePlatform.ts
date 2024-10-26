@@ -55,7 +55,7 @@ export class SolarEdgePlatform implements DynamicPlatformPlugin {
     }, log);
 
     this.accessoryDefinitions = [
-      new BatteryAccessory('battery', 1, this.locale, this.serviceResolver, this.log),
+      new BatteryAccessory('battery', 2, this.locale, this.serviceResolver, this.log),
     ];
 
     this.log.debug('Finished initializing platform');

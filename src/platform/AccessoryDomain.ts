@@ -80,8 +80,8 @@ export abstract class AccessoryDefinition {
     platformAccessory.context.serialNumber = data.device.serialNumber;
 
     const accessoryInformationService = this.getOrCreateService('AccessoryInformation', platformAccessory);
-    accessoryInformationService.updateCharacteristic(this.serviceResolver.resolveCharacteristic('Manufacturer'), 'SolarEdge');
-    accessoryInformationService.updateCharacteristic(this.serviceResolver.resolveCharacteristic('Model'), `${data.device.model} (${data.site.name})`);
+    accessoryInformationService.updateCharacteristic(this.serviceResolver.resolveCharacteristic('Manufacturer'), data.device.manufacturer);
+    accessoryInformationService.updateCharacteristic(this.serviceResolver.resolveCharacteristic('Model'), data.device.model);
     accessoryInformationService.updateCharacteristic(this.serviceResolver.resolveCharacteristic('SerialNumber'), data.device.serialNumber);
 
     this.update(platformAccessory, data);

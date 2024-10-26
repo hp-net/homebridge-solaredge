@@ -78,9 +78,9 @@ export class SolarEdgeApiFetcher extends EventEmitter implements DataFetcher {
       for (const site of this.sites) {
         try {
           const powerFlow = await this.fetchPowerFlow(site);
-          const devices = await this.fetchDevices(site);
+          const inventory = await this.fetchInventory(site);
 
-          const battery = this.mapBattery(site, powerFlow, devices);
+          const battery = this.mapBattery(site, powerFlow, inventory.batteries);
           if (battery) {
             this.log.debug(`Prepared battery data:\n${JSON.stringify(battery)}`);
             this._onBatteryData(battery);
@@ -98,59 +98,63 @@ export class SolarEdgeApiFetcher extends EventEmitter implements DataFetcher {
 
   private async fetchSites(): Promise<api.Site[]> {
     this.log.debug('Fetch sites');
-    const response = await this.cache.get<api.Site[]>(
+    const response = await this.cache.get<api.SiteResponse>(
       '/sites/list',
       30,
       'MINUTES',
       async () => {
-        return await this.getFromSolarEdge<api.Site[]>('/v2/sites');
+        return await this.getFromSolarEdge<api.SiteResponse>('/sites/list');
       },
     );
 
-    this.log.debug(`${response.length} sites fetched`);
+    this.log.debug(`${response.sites?.site?.length} sites fetched`);
 
-    return response.systems;
+    return response.sites?.site;
   }
 
-  private async fetchDevices(site: Site): Promise<api.Device[]> {
-    this.log.debug('Fetch sites');
-    const response = await this.cache.get<api.Device[]>(
-        `/v2/sites/${site.siteId}/devices`,
+  private async fetchInventory(site: Site): Promise<api.Inventory> {
+    this.log.debug('Fetch inventory');
+    const response = await this.cache.get<api.InventoryResponse>(
+        `/site/${site.id}/inventory`,
         30,
         'MINUTES',
         async () => {
-          return await this.getFromSolarEdge<api.Device[]>(`/v2/sites/${site.siteId}/devices`);
+          return await this.getFromSolarEdge<api.InventoryResponse>(`/site/${site.id}/inventory`);
         },
     );
 
-    this.log.debug(`${response.length} devices fetched`);
+    this.log.debug(`Inventory fetched`);
 
-    return response.systems;
+    return response.Inventory;
   }
 
   private async fetchPowerFlow(site: api.Site): Promise<api.PowerFlow> {
     this.log.debug('Fetch power flow');
-    const response = await this.getFromSolarEdge<api.PowerFlow>(
-      `/v2/sites/${site.siteId}/power-flow`,
+    const response = await this.getFromSolarEdge<api.PowerFlowResponse>(
+      `/site/${site.id}/currentPowerFlow`,
     );
     this.log.debug(`Power flow fetched`);
-    return response;
+    return response.siteCurrentPowerFlow;
   }
 
-  private mapBattery(site: api.Site, powerFlow: api.PowerFlow, devices: api.Device[]): BatteryData | null {
-    const batteries = devices.filter(d => d.active && d.type === 'BATTERY')
+  private mapBattery(site: api.Site, powerFlow: api.PowerFlow, batteries: api.Battery[]): BatteryData | null {
     if (!batteries.length) {
       return null;
     }
 
     return {
       site: {
-        id: site.siteId,
+        id: site.id,
         name: site.name,
       },
-      chargeLevel: powerFlow.storage?.chargeLevel,
-      status: powerFlow.storage?.status,
-      device: batteries[0],
+      chargeLevel: powerFlow.STORAGE?.chargeLevel,
+      status: powerFlow.STORAGE?.status,
+      critical: powerFlow.STORAGE?.critical,
+      device: {
+        model: batteries[0].model,
+        manufacturer: batteries[0].manufacturer,
+        serialNumber: batteries[0].SN
+      },
     };
   }
 
@@ -158,11 +162,11 @@ export class SolarEdgeApiFetcher extends EventEmitter implements DataFetcher {
     this.log.debug(`GET ${url}, params: ${JSON.stringify(params)}`);
     try {
       const { data } = await axios.get<T>(url, {
-        headers: {
-          'X-API-Key': this.options.apiKey,
-        },
-        params,
-      });
+      params: {
+        ...params,
+        'api_key': this.options.apiKey
+      }
+    });
 
       if(this.options.showApiResponse) {
         this.log.info('SolarEdge data from '+url+': ' +JSON.stringify(data));

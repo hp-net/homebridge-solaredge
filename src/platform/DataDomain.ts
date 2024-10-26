@@ -20,4 +20,5 @@ export interface BatteryData {
   device: Device
   status: string
   chargeLevel: number
+  critical: boolean
 }
