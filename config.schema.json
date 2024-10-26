@@ -1,0 +1,72 @@
+{
+    "pluginAlias": "SolarEdge",
+    "pluginType": "platform",
+    "singular": true,
+    "customUi": true,
+    "customUiPath": "./dist/homebridge-ui",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+            "title": "API Key",
+            "type": "string",
+            "required": true
+        },
+        "language": {
+          "title": "Language",
+          "type": "string",
+          "default": "en",
+          "oneOf": [
+            {
+              "title": "English",
+              "enum": [
+                "en"
+              ]
+            },
+            {
+              "title": "Polish",
+              "enum": [
+                "pl"
+              ]
+            }
+          ],
+          "required": true
+        },
+        "showApiResponse": {
+          "title": "Show SolarEdge API response",
+          "type": "boolean"
+        }
+      }
+    },
+    "layout": [
+      {
+        "type": "fieldset",
+        "title": "SolarEdge API Credentials",
+        "expandable": false,
+        "items": [
+          "apiKey",
+          "secret"
+        ]
+      },
+      {
+        "type": "fieldset",
+        "title": "Locale",
+        "description": "Accessories language",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "language"
+        ]
+      },
+      {
+        "type": "fieldset",
+        "title": "Advanced Settings",
+        "description": "Don't change these, unless you understand what you're doing.",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "showApiResponse"
+        ]
+      }
+    ]
+  }
